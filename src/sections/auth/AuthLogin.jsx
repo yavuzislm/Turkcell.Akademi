@@ -69,8 +69,8 @@ export default function AuthLogin({ isDemo = false }) {
     <>
       <Formik
         initialValues={{
-          email: 'admin@example.com',
-          password: '123456',
+          email: '',
+          password: '',
           submit: null
         }}
         validationSchema={Yup.object().shape({
@@ -85,9 +85,9 @@ export default function AuthLogin({ isDemo = false }) {
         {({ errors, handleBlur, handleChange, touched, values, handleSubmit }) => (
           <form noValidate onSubmit={handleSubmit}>
             <Grid container spacing={3}>
-              <Grid item xs={1}>
+              <Grid item xs={12}>
                 <Stack sx={{ gap: 1 }}>
-                  <InputLabel htmlFor="email-login">Öğrenci Maili</InputLabel>
+                  <InputLabel htmlFor="email-login">Öğrenci Maili</InputLabel> {/* burada*/}
                   <OutlinedInput
                     id="email-login"
                     type="email"
@@ -109,8 +109,8 @@ export default function AuthLogin({ isDemo = false }) {
               </Grid>
 
               <Grid item xs={12}>
-                <Stack sx={{ gap: 1 }}>
-                  <InputLabel htmlFor="password-login">Password</InputLabel>
+                <Stack sx={{ gap: 1}}>
+                  <InputLabel htmlFor="password-login">Şifre</InputLabel>
                   <OutlinedInput
                     fullWidth
                     error={Boolean(touched.password && errors.password)}

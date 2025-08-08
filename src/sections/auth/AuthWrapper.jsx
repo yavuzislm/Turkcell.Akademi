@@ -35,7 +35,7 @@ export default function AuthWrapper({ children }) {
           >
             <Grid>
               <AuthCard>
-                <Box sx={{ mb: 3, textAlign: 'center' }}>
+                <Box sx={{ mb: 3, textAlign: 'left' }}>
                   <Typography variant="h3" sx={{ 
                     fontWeight: 'bold', 
                     color: 'text.primary',
