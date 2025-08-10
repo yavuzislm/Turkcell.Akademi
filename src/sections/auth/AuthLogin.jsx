@@ -39,7 +39,7 @@ export default function AuthLogin({ isDemo = false }) {
   const handleClickShowPassword = () => setShowPassword(!showPassword);
   const handleMouseDownPassword = (event) => event.preventDefault();
 
-  const handleLoginSubmit = async (values) => {
+  const  handleLoginSubmit = async (values) => {
     setIsLoading(true);
     try {
       const response = await axios.post('http://127.0.0.1:5000/login', {
@@ -50,10 +50,12 @@ export default function AuthLogin({ isDemo = false }) {
         login();
         navigate('/dashboard');
       } else {
+        navigate('/login');
         alert(response.data.message || 'Giriş başarısız');
       }
     } catch (error) {
       if (error.response?.status === 401) {
+        navigate('/login');
         alert('Geçersiz email veya şifre!');
       } else if (error.code === 'ECONNREFUSED') {
         alert('Flask sunucusu çalışmıyor! Lütfen server.py dosyasını çalıştırın.');
@@ -75,7 +77,7 @@ export default function AuthLogin({ isDemo = false }) {
         }}
         validationSchema={Yup.object().shape({
           email: Yup.string().email('Geçerli bir email giriniz').max(255).required('Email gereklidir'),
-          password: Yup.string()
+          password: Yup.string() //validation with help of Yup.
             .required('Şifre gereklidir')
             .test('no-leading-trailing-whitespace', 'Şifre başında veya sonunda boşluk olamaz', (value) => value === value.trim())
             .max(10, 'Şifre 10 karakterden az olmalıdır')
@@ -85,7 +87,7 @@ export default function AuthLogin({ isDemo = false }) {
         {({ errors, handleBlur, handleChange, touched, values, handleSubmit }) => (
           <form noValidate onSubmit={handleSubmit}>
             <Grid container spacing={3}>
-              <Grid item xs={12}>
+              <Grid size={12}>
                 <Stack sx={{ gap: 1 }}>
                   <InputLabel htmlFor="email-login">Öğrenci Maili</InputLabel> {/* burada*/}
                   <OutlinedInput
@@ -94,11 +96,11 @@ export default function AuthLogin({ isDemo = false }) {
                     value={values.email}
                     name="email"
                     onBlur={handleBlur}
-                    onChange={handleChange}
+                    onChange={handleChange} // set etmeyi burada yapıyoruz.
                     placeholder="Öğrenci mailinizi giriniz"
                     fullWidth
                     error={Boolean(touched.email && errors.email)}
-                    disabled={isLoading}
+                    //disabled={isLoading}
                   />
                 </Stack>
                 {touched.email && errors.email && (
@@ -108,7 +110,7 @@ export default function AuthLogin({ isDemo = false }) {
                 )}
               </Grid>
 
-              <Grid item xs={12}>
+              <Grid size={12}>
                 <Stack sx={{ gap: 1}}>
                   <InputLabel htmlFor="password-login">Şifre</InputLabel>
                   <OutlinedInput
@@ -145,7 +147,7 @@ export default function AuthLogin({ isDemo = false }) {
                 )}
               </Grid>
 
-              <Grid item xs={12} sx={{ mt: -1 }}>
+              <Grid sx={{ mt: -1 }} size={12}>
                 <Stack direction="row" sx={{ gap: 2, alignItems: 'baseline', justifyContent: 'space-between' }}>
                   <FormControlLabel
                     control={
@@ -166,7 +168,7 @@ export default function AuthLogin({ isDemo = false }) {
                 </Stack>
               </Grid>
 
-              <Grid item xs={12}>
+              <Grid size={12}>
                 <AnimateButton>
                   <Button 
                     fullWidth 
