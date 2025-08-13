@@ -33,6 +33,13 @@ import avatar3 from 'assets/images/users/avatar-3.png';
 import avatar4 from 'assets/images/users/avatar-4.png';
 
 // avatar style
+
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
+
+
 const avatarSX = {
   width: 36,
   height: 36,
@@ -50,34 +57,105 @@ const actionSX = {
 };
 
 export function SearchBarBasic({ onSearch }) {
-  const [q, setQ] = useState('');
+  const [q, setQ] = useState('');  //yazdıklarımı q değişkeni ile tutuyor
+  const [open, setOpen] = useState(false);
+  const [submitted, setSubmitted] = useState('');
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSearch?.(q.trim());
+
+    const term = q.trim();
+    if (!term) return;           // Eğer arama terimi boşsa hiçbir şey yapma demek istiyor
+    setSubmitted(term);
+    setOpen(true);
+    onSearch?.(term); 
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{
-      display: 'flex', alignItems: 'center', gap: 8,
-      border: '1px solid #ccc', borderRadius: 12, padding: '8px 12px', width: 360
-    }}>
-      <input
-        value={q}
-        onChange={(e) => setQ(e.target.value)}
-        placeholder="Ara..."
-        aria-label="Site içinde ara"
-        style={{ flex: 1, border: 'none', outline: 'none', fontSize: 14, background: 'transparent' }}
-      />
-      <button type="submit" style={{
-        border: 'none', background: '#111', color: '#fff',
-        padding: '8px 12px', borderRadius: 8, cursor: 'pointer'
-      }}>
-        Ara
-      </button>
-    </form>
+    <>
+      <form
+        onSubmit={handleSubmit}
+        style={{
+          display: 'flex', alignItems: 'center', gap: 8,
+          border: '1px solid #ccc', borderRadius: 12, padding: '8px 12px', width: 360
+        }}
+      >
+        <input
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder="Ara..."
+          style={{ flex: 1, border: 'none', outline: 'none', fontSize: 14, background: 'transparent' }}
+        />
+        <Button
+          type="submit"
+          variant="contained"
+          disableElevation
+          sx={{
+            // normal hali siyah
+            bgcolor: '#111',
+            color: 'common.white',
+            textTransform: 'none',
+            borderRadius: 2,         // 16px ≈ 2 * 8px
+            px: 1.5,                 // yatay padding
+            minHeight: 36,
+            transition: 'background-color 120ms ease',
+
+            // etkileşim: hover/active/focus-visible => mavi
+            '&:hover, &:active, &:focus-visible': {
+              bgcolor: 'primary.main'
+            }
+          }}
+          >
+          Ara
+        </Button>
+      </form>
+
+      {/* Popup */}
+      <Dialog 
+        open={open} 
+        onClose={() => setOpen(false)}
+        fullWidth
+        PaperProps={{ // Dialog yani Pop up içersinde eğerki şekil düzenleme yapmak istersen paperprops kullanıyorsun.
+          sx: {
+            borderRadius: '20px',
+            backgroundColor: '#fff',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.2)'
+          }
+        }}>
+        
+        <DialogTitle
+          variant='h5' //padding top ve padding bottom ikilisi burada görüntüyü beğenmedim diye eklendi
+          sx={{ pt: 3, pb: 1 }}>{submitted.toUpperCase()} 
+        </DialogTitle>
+
+        <DialogContent dividers sx={{pt: 0.5, pb: 2, '&.MuiDialogContent-dividers': {borderTop: 'none',borderBottom: 'none'}}}>
+          <Typography variant="body1" sx={{ mb: 1 }}>
+            {submitted} Ders içeriği:
+          </Typography>
+          <Typography variant="h6">{submitted}</Typography>
+
+          {/* Buraya istediğin ek bilgiyi koyabilirsin:
+              - API’den gelen özet
+              - "Sonuç bulunamadı" durumu
+              - İlgili ders/ürün listesi vb. */}
+        </DialogContent>
+        <DialogActions>
+          <Button 
+            sx={{
+              border: 'none',
+              background: '#111',
+              color: '#fff',
+              padding: '8px 12px',
+              borderRadius: 8,
+              cursor: 'pointer',
+            }}
+            onClick={() => setOpen(false)} variant="contained">Kapat</Button>
+        </DialogActions>
+      </Dialog>
+    </>
   );
-} 
+}
+ 
 // ==============================|| DASHBOARD - DEFAULT ||============================== //
 
 export default function DashboardDefault() {
