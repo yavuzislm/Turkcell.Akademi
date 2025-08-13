@@ -17,21 +17,19 @@ import { NumericFormat } from 'react-number-format';
 // project imports
 import Dot from 'components/@extended/Dot';
 
-function createData(tracking_no, name, fat, carbs, protein) {
-  return { tracking_no, name, fat, carbs, protein };
+function createData(ders_kodu, ders_ismi, kredi, ders_akts, ders_status) {
+  return { ders_kodu, ders_ismi, kredi, ders_akts, ders_status };
 }
 
 const rows = [
-  createData(84564564, 'Camera Lens', 40, 2, 40570),
-  createData(98764564, 'Laptop', 300, 0, 180139),
-  createData(98756325, 'Mobile', 355, 1, 90989),
-  createData(98652366, 'Handset', 50, 1, 10239),
-  createData(13286564, 'Computer Accessories', 100, 1, 83348),
-  createData(86739658, 'TV', 99, 0, 410780),
-  createData(13256498, 'Keyboard', 125, 2, 70999),
-  createData(98753263, 'Mouse', 89, 2, 10570),
-  createData(98753275, 'Desktop', 185, 1, 98063),
-  createData(98753291, 'Chair', 100, 0, 14001)
+  createData("CEN121", 'Computer Programming I', 4, 7, 40570),
+  createData("EEE119", 'Electrical and Electronics Engineering Materials', 3, 4, 180139),
+  createData("MATH111", 'Calculus I', 5, 6, 90989),
+  createData("PHYS101", 'Physics I', 4, 6, 10239),
+  createData("EEE102", 'Circuit Theory I', 4, 7, 83348),
+  createData("MATH113", 'Linear Algebra', 3, 4, 410780),
+  createData("HIS101", 'Advanced English I', 3, 3, 70999),
+  createData("MATH112", 'Calculus II', 5, 6, 10570),
 ];
 
 function descendingComparator(a, b, orderBy) {
@@ -62,35 +60,34 @@ function stableSort(array, comparator) {
 
 const headCells = [
   {
-    id: 'tracking_no',
+    id: 'ders_kodu',
     align: 'left',
     disablePadding: false,
-    label: 'Tracking No.'
+    label: 'Ders Kodu'
   },
   {
-    id: 'name',
+    id: 'ders_ismi',
     align: 'left',
     disablePadding: true,
-    label: 'Product Name'
+    label: 'Ders Adı'
   },
   {
-    id: 'fat',
-    align: 'right',
+    id: 'kredi',
+    align: 'center',
     disablePadding: false,
-    label: 'Total Order'
+    label: 'Kredi'
   },
   {
-    id: 'carbs',
-    align: 'left',
+    id: 'ders_akts',
+    align: 'center',
     disablePadding: false,
-
-    label: 'Status'
+    label: 'AKTS'
   },
   {
-    id: 'protein',
-    align: 'right',
+    id: 'ders_status',
+    align: 'center',
     disablePadding: false,
-    label: 'Total Amount'
+    label: 'Onay Durumu'
   }
 ];
 
@@ -138,7 +135,7 @@ function OrderStatus({ status }) {
   }
 
   return (
-    <Stack direction="row" sx={{ gap: 1, alignItems: 'center' }}>
+    <Stack direction="row" sx={{ gap: 1, alignItems: 'center', display: 'inline-flex' }}>
       <Dot color={color} />
       <Typography>{title}</Typography>
     </Stack>
@@ -178,15 +175,13 @@ export default function OrderTable() {
                   key={row.tracking_no}
                 >
                   <TableCell component="th" id={labelId} scope="row">
-                    <Link color="secondary">{row.tracking_no}</Link>
+                    <Link color="secondary">{row.ders_kodu}</Link>
                   </TableCell>
-                  <TableCell>{row.name}</TableCell>
-                  <TableCell align="right">{row.fat}</TableCell>
-                  <TableCell>
-                    <OrderStatus status={row.carbs} />
-                  </TableCell>
-                  <TableCell align="right">
-                    <NumericFormat value={row.protein} displayType="text" thousandSeparator prefix="$" />
+                  <TableCell align="left">{row.ders_ismi}</TableCell>
+                  <TableCell align="center">{row.kredi}</TableCell>
+                  <TableCell align="center">{row.ders_akts}</TableCell>
+                  <TableCell align="center">
+                    <OrderStatus status={row.ders_status} />
                   </TableCell>
                 </TableRow>
               );

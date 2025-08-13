@@ -11,6 +11,7 @@ import ListItemText from '@mui/material/ListItemText';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
+import { useState } from 'react';
 
 // project imports
 import MainCard from 'components/MainCard';
@@ -48,6 +49,35 @@ const actionSX = {
   transform: 'none'
 };
 
+export function SearchBarBasic({ onSearch }) {
+  const [q, setQ] = useState('');
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSearch?.(q.trim());
+  };
+
+  return (
+    <form onSubmit={handleSubmit} style={{
+      display: 'flex', alignItems: 'center', gap: 8,
+      border: '1px solid #ccc', borderRadius: 12, padding: '8px 12px', width: 360
+    }}>
+      <input
+        value={q}
+        onChange={(e) => setQ(e.target.value)}
+        placeholder="Ara..."
+        aria-label="Site içinde ara"
+        style={{ flex: 1, border: 'none', outline: 'none', fontSize: 14, background: 'transparent' }}
+      />
+      <button type="submit" style={{
+        border: 'none', background: '#111', color: '#fff',
+        padding: '8px 12px', borderRadius: 8, cursor: 'pointer'
+      }}>
+        Ara
+      </button>
+    </form>
+  );
+} 
 // ==============================|| DASHBOARD - DEFAULT ||============================== //
 
 export default function DashboardDefault() {
@@ -71,63 +101,17 @@ export default function DashboardDefault() {
       </Grid>
       <Grid sx={{ display: { sm: 'none', md: 'block', lg: 'none' } }} size={{ md: 8 }} />
       {/* row 2 */}
-      <Grid size={{ xs: 12, md: 7, lg: 8 }}>
-        <UniqueVisitorCard />
-      </Grid>
-      <Grid size={{ xs: 12, md: 5, lg: 4 }}>
-        <Grid container alignItems="center" justifyContent="space-between">
-          <Grid>
-            <Typography variant="h5">Income Overview</Typography>
-          </Grid>
-          <Grid />
-        </Grid>
-        <MainCard sx={{ mt: 2 }} content={false}>
-          <Box sx={{ p: 3, pb: 0 }}>
-            <Stack sx={{ gap: 2 }}>
-              <Typography variant="h6" color="text.secondary">
-                This Week Statistics
-              </Typography>
-              <Typography variant="h3">$7,650</Typography>
-            </Stack>
-          </Box>
-          <MonthlyBarChart />
-        </MainCard>
-      </Grid>
+      <SearchBarBasic onSearch={(term) => console.log('Ara:', term)} />
       {/* row 3 */}
-      <Grid size={{ xs: 12, md: 7, lg: 8 }}>
+      <Grid size={12}>
         <Grid container alignItems="center" justifyContent="space-between">
           <Grid>
-            <Typography variant="h5">Recent Orders</Typography>
+            <Typography variant="h5" > Ders Listesi</Typography>
           </Grid>
           <Grid />
         </Grid>
         <MainCard sx={{ mt: 2 }} content={false}>
           <OrdersTable />
-        </MainCard>
-      </Grid>
-      <Grid size={{ xs: 12, md: 5, lg: 4 }}>
-        <Grid container alignItems="center" justifyContent="space-between">
-          <Grid>
-            <Typography variant="h5">Analytics Report</Typography>
-          </Grid>
-          <Grid />
-        </Grid>
-        <MainCard sx={{ mt: 2 }} content={false}>
-          <List sx={{ p: 0, '& .MuiListItemButton-root': { py: 2 } }}>
-            <ListItemButton divider>
-              <ListItemText primary="Company Finance Growth" />
-              <Typography variant="h5">+45.14%</Typography>
-            </ListItemButton>
-            <ListItemButton divider>
-              <ListItemText primary="Company Expenses Ratio" />
-              <Typography variant="h5">0.58%</Typography>
-            </ListItemButton>
-            <ListItemButton>
-              <ListItemText primary="Business Risk Cases" />
-              <Typography variant="h5">Low</Typography>
-            </ListItemButton>
-          </List>
-          <ReportAreaChart />
         </MainCard>
       </Grid>
       {/* row 4 */}
