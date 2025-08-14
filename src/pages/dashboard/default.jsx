@@ -11,7 +11,13 @@ import ListItemText from '@mui/material/ListItemText';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
 import { useState } from 'react';
+
+import axios from 'axios';
 
 // project imports
 import MainCard from 'components/MainCard';
@@ -33,13 +39,6 @@ import avatar3 from 'assets/images/users/avatar-3.png';
 import avatar4 from 'assets/images/users/avatar-4.png';
 
 // avatar style
-
-import Dialog from '@mui/material/Dialog';
-import DialogTitle from '@mui/material/DialogTitle';
-import DialogContent from '@mui/material/DialogContent';
-import DialogActions from '@mui/material/DialogActions';
-
-
 const avatarSX = {
   width: 36,
   height: 36,
@@ -56,19 +55,53 @@ const actionSX = {
   transform: 'none'
 };
 
+// SearchBarBasic Komponenti
 export function SearchBarBasic({ onSearch }) {
-  const [q, setQ] = useState('');  //yazdıklarımı q değişkeni ile tutuyor
+  const [q, setQ] = useState('');
   const [open, setOpen] = useState(false);
   const [submitted, setSubmitted] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [description, setDescription] = useState('');
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     const term = q.trim();
-    if (!term) return;           // Eğer arama terimi boşsa hiçbir şey yapma demek istiyor
+    if (!term) return;
+
     setSubmitted(term);
+    setLoading(true);
+    setError(''); //Errorlar tekrarlıyordu. Tekrardan almamak için boş stringe ayarlamam gerektiğini okudum.
+    setDescription(''); // Aynı error gibi eski bilgiler döndürdüğü oluyordu.
     setOpen(true);
-    onSearch?.(term); 
+    onSearch?.(term);
+
+    try {
+      const response = await axios.post('http://127.0.0.1:5000/api/logs/search', { 
+        q: term, 
+        ts: Date.now() 
+      });
+      
+      console.log('Arama başarılı:', response.data); // İncelerken hata alıyor muyum diye ekledim.
+      
+      if (response.data && response.data.description) {
+        setDescription(response.data.description);
+      } else {
+        setDescription('Ders açıklaması bulunamadı.');
+      }
+      
+    } catch (err) {
+      console.error('Arama hatası:', err);
+      
+      if (err.response && err.response.status === 404) {
+        setError('Ders bulunamadı. Lütfen farklı bir terimle arayın.');
+      } else {
+        setError('Arama sırasında bir hata oluştu. Lütfen tekrar deneyin.');
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -76,115 +109,213 @@ export function SearchBarBasic({ onSearch }) {
       <form
         onSubmit={handleSubmit}
         style={{
-          display: 'flex', alignItems: 'center', gap: 8,
-          border: '1px solid #ccc', borderRadius: 12, padding: '8px 12px', width: 360
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: 8,
+          border: '1px solid #ccc', 
+          borderRadius: 12, 
+          padding: '8px 12px', 
+          width: 360
         }}
       >
         <input
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="Ara..."
-          style={{ flex: 1, border: 'none', outline: 'none', fontSize: 14, background: 'transparent' }}
+          placeholder="Ders kodu veya adı..."
+          style={{ 
+            flex: 1, 
+            border: 'none', 
+            outline: 'none', 
+            fontSize: 14, 
+            background: 'transparent' 
+          }}
         />
         <Button
           type="submit"
           variant="contained"
-          disableElevation
+          disableElevation 
+          disabled={loading}
           sx={{
-            // normal hali siyah
             bgcolor: '#111',
             color: 'common.white',
             textTransform: 'none',
-            borderRadius: 2,         // 16px ≈ 2 * 8px
-            px: 1.5,                 // yatay padding
+            borderRadius: 2,
+            px: 1.5,
             minHeight: 36,
             transition: 'background-color 120ms ease',
-
-            // etkileşim: hover/active/focus-visible => mavi
             '&:hover, &:active, &:focus-visible': {
-              bgcolor: 'primary.main'
+              bgcolor: '#363636ff'
+            },
+            '&:disabled': {
+              bgcolor: 'grey.400'
             }
           }}
-          >
-          Ara
+        >
+          {loading ? 'Aranıyor...' : 'Ara'}
         </Button>
       </form>
 
-      {/* Popup */}
-      <Dialog 
-        open={open} 
+      {/* Popup Dialog */}
+      <Dialog
+        open={open}
         onClose={() => setOpen(false)}
         fullWidth
-        PaperProps={{ // Dialog yani Pop up içersinde eğerki şekil düzenleme yapmak istersen paperprops kullanıyorsun.
+        maxWidth="sm"
+        PaperProps={{ 
           sx: {
             borderRadius: '20px',
             backgroundColor: '#fff',
             boxShadow: '0 4px 20px rgba(0,0,0,0.2)'
           }
-        }}>
-        
-        <DialogTitle
-          variant='h5' //padding top ve padding bottom ikilisi burada görüntüyü beğenmedim diye eklendi
-          sx={{ pt: 3, pb: 1 }}>{submitted.toUpperCase()} 
+        }}
+      >
+        <DialogTitle sx={{ pt: 3, pb: 1 }}>
+          <Typography variant="h5">{submitted.toUpperCase()}</Typography>
         </DialogTitle>
 
-        <DialogContent dividers sx={{pt: 0.5, pb: 2, '&.MuiDialogContent-dividers': {borderTop: 'none',borderBottom: 'none'}}}>
-          <Typography variant="body1" sx={{ mb: 1 }}>
-            {submitted} Ders içeriği:
-          </Typography>
-          <Typography variant="h6">{submitted}</Typography>
-
-          {/* Buraya istediğin ek bilgiyi koyabilirsin:
-              - API’den gelen özet
-              - "Sonuç bulunamadı" durumu
-              - İlgili ders/ürün listesi vb. */}
+        <DialogContent 
+          dividers 
+          sx={{ 
+            pt: 2, 
+            pb: 2, 
+            '&.MuiDialogContent-dividers': { 
+              borderTop: 'none', 
+              borderBottom: 'none' 
+            } 
+          }}
+        >
+          {error ? (
+            <Box>
+              <Typography variant="body1" color="error" sx={{ mb: 2 }}> 
+                {error}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Mevcut dersler için ders listesini kontrol edebilirsiniz.
+              </Typography>
+            </Box>
+          ) : description ? (
+            <Box>
+              <Typography variant="body1" sx={{ mb: 2, fontWeight: 'bold' }}>
+                Ders İçeriği:
+              </Typography>
+              <Typography variant="body1" sx={{ 
+                backgroundColor: '#f5f5f5', 
+                padding: 2, 
+                borderRadius: 2,
+                lineHeight: 1.6
+              }}>
+                {description}
+              </Typography>
+            </Box>
+          ) : (
+            <Typography variant="body1" color="text.secondary">
+              Ders bilgisi bulunamadı.
+            </Typography>
+          )}
         </DialogContent>
-        <DialogActions>
-          <Button 
+        
+        <DialogActions sx={{ p: 2 }}>
+          <Button
+            sx={{
+                border: 'none',
+                background: '#1d8535ff',
+                color: '#fff',
+                padding: '8px 16px',
+                borderRadius: 8,
+                cursor: 'pointer',
+                '&:hover': {
+                  background: '#0c5218aa',
+                  color: '#fff',
+                }
+              }}
+          >Ekle
+          </Button>
+
+          <Button
+            sx={{
+              border: 'none',
+              background: '#b41010ff',
+              color: '#fff',
+              padding: '8px 16px',
+              borderRadius: 8,
+              cursor: 'pointer',
+              '&:hover': {
+                background: '#920f0fb9',
+                color: '#fff',
+              }
+            }}
+          >
+            Çıkar
+          </Button>
+
+          <Button
             sx={{
               border: 'none',
               background: '#111',
               color: '#fff',
-              padding: '8px 12px',
+              padding: '8px 16px',
               borderRadius: 8,
               cursor: 'pointer',
+              '&:hover': {
+                background: '#333',
+              }
             }}
-            onClick={() => setOpen(false)} variant="contained">Kapat</Button>
+            onClick={() => {
+              setOpen(false);
+              setQ(''); // KUTUYA BASTIKTAN SONRA ÇIKARSAM TEMİZLESİN DİYE..
+            }} 
+            variant="contained"
+          >
+            Kapat
+          </Button>
         </DialogActions>
       </Dialog>
     </>
   );
 }
- 
+
 // ==============================|| DASHBOARD - DEFAULT ||============================== //
 
 export default function DashboardDefault() {
+  const handleSearch = (term) => {
+    console.log('Arama terimi:', term);
+  };
+
   return (
     <Grid container rowSpacing={4.5} columnSpacing={2.75}>
       {/* row 1 */}
       <Grid sx={{ mb: -2.25 }} size={12}>
         <Typography variant="h5">Dashboard</Typography>
       </Grid>
+      
       <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
         <AnalyticEcommerce title="Total Page Views" count="4,42,236" percentage={59.3} extra="35,000" />
       </Grid>
+      
       <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
         <AnalyticEcommerce title="Total Users" count="78,250" percentage={70.5} extra="8,900" />
       </Grid>
+      
       <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
         <AnalyticEcommerce title="Total Order" count="18,800" percentage={27.4} isLoss color="warning" extra="1,943" />
       </Grid>
+      
       <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
         <AnalyticEcommerce title="Total Sales" count="35,078" percentage={27.4} isLoss color="warning" extra="20,395" />
       </Grid>
+      
       <Grid sx={{ display: { sm: 'none', md: 'block', lg: 'none' } }} size={{ md: 8 }} />
-      {/* row 2 */}
-      <SearchBarBasic onSearch={(term) => console.log('Ara:', term)} />
-      {/* row 3 */}
+      
+      {/* row 2 - Search Bar */}
+      <Grid size={12}>
+        <SearchBarBasic onSearch={handleSearch} />
+      </Grid>
+      
+      {/* row 3 - Ders Listesi */}
       <Grid size={12}>
         <Grid container alignItems="center" justifyContent="space-between">
           <Grid>
-            <Typography variant="h5" > Ders Listesi</Typography>
+            <Typography variant="h5">Ders Listesi</Typography>
           </Grid>
           <Grid />
         </Grid>
@@ -192,10 +323,12 @@ export default function DashboardDefault() {
           <OrdersTable />
         </MainCard>
       </Grid>
+      
       {/* row 4 */}
       <Grid size={{ xs: 12, md: 7, lg: 8 }}>
         <SaleReportCard />
       </Grid>
+      
       <Grid size={{ xs: 12, md: 5, lg: 4 }}>
         <Grid container alignItems="center" justifyContent="space-between">
           <Grid>
@@ -203,6 +336,7 @@ export default function DashboardDefault() {
           </Grid>
           <Grid />
         </Grid>
+        
         <MainCard sx={{ mt: 2 }} content={false}>
           <List
             component="nav"
@@ -238,6 +372,7 @@ export default function DashboardDefault() {
               </ListItemAvatar>
               <ListItemText primary={<Typography variant="subtitle1">Order #002434</Typography>} secondary="Today, 2:00 AM" />
             </ListItem>
+            
             <ListItem
               component={ListItemButton}
               divider
@@ -259,6 +394,7 @@ export default function DashboardDefault() {
               </ListItemAvatar>
               <ListItemText primary={<Typography variant="subtitle1">Order #984947</Typography>} secondary="5 August, 1:45 PM" />
             </ListItem>
+            
             <ListItem
               component={ListItemButton}
               secondaryAction={
@@ -281,6 +417,7 @@ export default function DashboardDefault() {
             </ListItem>
           </List>
         </MainCard>
+        
         <MainCard sx={{ mt: 2 }}>
           <Stack sx={{ gap: 3 }}>
             <Grid container justifyContent="space-between" alignItems="center">
