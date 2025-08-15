@@ -60,9 +60,9 @@ export function SearchBarBasic({ onSearch }) {
   const [q, setQ] = useState('');
   const [open, setOpen] = useState(false);
   const [submitted, setSubmitted] = useState('');
-  const [loading, setLoading] = useState(false);
   const [description, setDescription] = useState('');
   const [error, setError] = useState('');
+  const [courseName, setCourseName] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -71,7 +71,6 @@ export function SearchBarBasic({ onSearch }) {
     if (!term) return;
 
     setSubmitted(term);
-    setLoading(true);
     setError(''); //Errorlar tekrarlıyordu. Tekrardan almamak için boş stringe ayarlamam gerektiğini okudum.
     setDescription(''); // Aynı error gibi eski bilgiler döndürdüğü oluyordu.
     setOpen(true);
@@ -87,8 +86,10 @@ export function SearchBarBasic({ onSearch }) {
       
       if (response.data && response.data.description) {
         setDescription(response.data.description);
+        setCourseName(response.data.name);
       } else {
         setDescription('Ders açıklaması bulunamadı.');
+        setCourseName('');
       }
       
     } catch (err) {
@@ -96,11 +97,11 @@ export function SearchBarBasic({ onSearch }) {
       
       if (err.response && err.response.status === 404) {
         setError('Ders bulunamadı. Lütfen farklı bir terimle arayın.');
+        setCourseName('');
       } else {
         setError('Arama sırasında bir hata oluştu. Lütfen tekrar deneyin.');
+        setCourseName('');
       }
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -133,8 +134,7 @@ export function SearchBarBasic({ onSearch }) {
         <Button
           type="submit"
           variant="contained"
-          disableElevation 
-          disabled={loading}
+          disableElevation
           sx={{
             bgcolor: '#111',
             color: 'common.white',
@@ -151,7 +151,7 @@ export function SearchBarBasic({ onSearch }) {
             }
           }}
         >
-          {loading ? 'Aranıyor...' : 'Ara'}
+          {'Ara'}
         </Button>
       </form>
 
@@ -170,7 +170,7 @@ export function SearchBarBasic({ onSearch }) {
         }}
       >
         <DialogTitle sx={{ pt: 3, pb: 1 }}>
-          <Typography variant="h5">{submitted.toUpperCase()}</Typography>
+          <Typography variant="h5">{courseName || submitted.toUpperCase()}</Typography>
         </DialogTitle>
 
         <DialogContent 
@@ -278,7 +278,7 @@ export function SearchBarBasic({ onSearch }) {
 
 export default function DashboardDefault() {
   const handleSearch = (term) => {
-    console.log('Arama terimi:', term);
+    console.log('Arama terimi:', term); 
   };
 
   return (
